@@ -1,6 +1,6 @@
 # Document Workflows
 **Workflow File:** `document-workflows.yml`
-**Last Generated:** 2025-11-24 21:36:21 UTC
+**Last Generated:** 2025-11-24 21:39:00 UTC
 ---
 ## Triggers
 
