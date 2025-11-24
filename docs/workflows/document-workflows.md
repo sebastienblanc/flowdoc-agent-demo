@@ -1,6 +1,6 @@
 # Document Workflows
 **Workflow File:** `document-workflows.yml`
-**Last Generated:** 2025-11-24 21:32:03 UTC
+**Last Generated:** 2025-11-24 21:33:06 UTC
 ---
 ## Triggers
 
@@ -19,11 +19,11 @@
      - fetch-depth: `0`
 
 2. **Set up Docker Compose**
-   - Run: `docker-compose --version
+   - Run: `docker compose version
 `
 
 3. **Run documentation agent**
-   - Run: `docker-compose -f compose.agent.yml --profile agent run --rm workflow-documenter
+   - Run: `docker compose -f compose.agent.yml --profile agent run --rm workflow-documenter
 `
 
 4. **Check for documentation changes**
