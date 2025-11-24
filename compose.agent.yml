@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  workflow-documenter:
+    image: python:3.11-slim
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: >
+      sh -c "
+      pip install --quiet pyyaml &&
+      python /workspace/scripts/document_workflows.py
+      "
+    profiles:
+      - agent
+
+x-github-agent:
+  name: workflow-documenter
+  description: Automatically generates markdown documentation for GitHub Action workflows
+  triggers:
+    - on: workflow_file_changed
+      paths:
+        - '.github/workflows/*.yml'
+        - '.github/workflows/*.yaml'
+  actions:
+    - service: workflow-documenter
+      description: Generate documentation for modified workflow files
