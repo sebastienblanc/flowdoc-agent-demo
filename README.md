@@ -1,10 +1,10 @@
 # flowdoc-agent-demo
 
-An automated system for generating comprehensive documentation for GitHub Actions workflows.
+An automated system for generating comprehensive documentation for GitHub Actions workflows using Docker's AI features.
 
 ## Overview
 
-This repository demonstrates an agentic approach to automatically documenting GitHub Actions workflows. Whenever a workflow file is added or modified, an agent automatically generates detailed markdown documentation.
+This repository demonstrates an agentic approach to automatically documenting GitHub Actions workflows using Docker Compose AI models. Whenever a workflow file is added or modified, an AI agent automatically analyzes and generates detailed markdown documentation.
 
 ## How It Works
 
@@ -12,38 +12,41 @@ The system consists of three main components:
 
 ### 1. Docker Compose Agent (`compose.agent.yml`)
 
-A Docker Compose configuration that defines the workflow documentation agent. It:
-- Uses Python 3.11 in a containerized environment
-- Installs necessary dependencies (PyYAML)
-- Runs the documentation generation script
+A Docker Compose configuration that leverages Docker's AI features:
+- Defines an AI model (`workflow-doc-model`) using Qwen 2.5 Coder for documentation generation
+- Configures a `workflow-documenter` service with AI-powered analysis
+- Uses environment variables to provide system instructions and prompts to the AI
 - Can be triggered based on workflow file changes
 
-### 2. Documentation Generator Script (`scripts/document_workflows.py`)
+### 2. AI Documentation Service (`ai.documenter/`)
 
-A Python script that:
-- Scans all workflow files in `.github/workflows/`
-- Parses YAML workflow definitions
-- Generates comprehensive markdown documentation including:
-  - Workflow name and metadata
-  - Trigger events (push, pull_request, etc.)
-  - Environment variables
-  - Job configurations
-  - Step-by-step breakdown of each job
-  - Matrix build strategies
+A Go-based service using Firebase Genkit that:
+- Connects to Docker's AI model runner
+- Reads GitHub Actions workflow YAML files
+- Uses AI to analyze and understand workflow configurations
+- Generates comprehensive, natural-language markdown documentation
 - Creates an index of all documented workflows
+
+The AI is instructed to analyze:
+- Workflow names and metadata
+- Trigger events (push, pull_request, etc.)
+- Environment variables
+- Job configurations and dependencies
+- Step-by-step breakdown of each job
+- Matrix build strategies
 
 ### 3. GitHub Actions Workflow (`.github/workflows/document-workflows.yml`)
 
 A GitHub Actions workflow that:
 - Triggers on changes to workflow files
-- Executes the Docker Compose agent
-- Commits generated documentation back to the repository
+- Executes the Docker Compose AI agent
+- Commits AI-generated documentation back to the repository
 - Uploads documentation as workflow artifacts
 
 ## Generated Documentation
 
 All generated documentation is stored in the `docs/workflows/` directory:
-- Each workflow gets its own `.md` file
+- Each workflow gets its own AI-generated `.md` file
 - A `README.md` index file lists all documented workflows
 - Documentation is automatically updated on every workflow change
 
@@ -62,14 +65,7 @@ Documentation is generated automatically whenever:
 You can also generate documentation manually using Docker Compose:
 
 ```bash
-docker-compose -f compose.agent.yml --profile agent run --rm workflow-documenter
-```
-
-Or directly with Python:
-
-```bash
-pip install pyyaml
-python scripts/document_workflows.py
+docker compose -f compose.agent.yml --profile agent run --rm workflow-documenter
 ```
 
 ## Example
@@ -81,17 +77,26 @@ See the automatically generated documentation:
 
 ## Benefits
 
+- **AI-Powered**: Uses large language models to generate natural, comprehensive documentation
 - **Always Up-to-Date**: Documentation is regenerated on every workflow change
-- **Comprehensive**: Captures all workflow details automatically
-- **Consistent**: Uses a standardized format for all workflows
+- **Intelligent Analysis**: AI understands context and explains complex workflow patterns
+- **Consistent**: Uses AI prompts to ensure standardized documentation format
 - **Low Maintenance**: No manual documentation updates required
 - **Self-Documenting**: The system documents its own workflow!
 
 ## Requirements
 
-- Docker and Docker Compose
+- Docker and Docker Compose with AI features support
 - GitHub Actions enabled on the repository
 - Write permissions for GitHub Actions (to commit documentation)
+
+## Technical Details
+
+This implementation uses:
+- **Docker Compose Models**: Native AI model integration in Docker Compose
+- **Firebase Genkit**: Go framework for building AI-powered applications
+- **OpenAI-compatible API**: Docker's model runner provides OpenAI-compatible endpoints
+- **Qwen 2.5 Coder**: Specialized coding model optimized for understanding code and technical documentation
 
 ## License
 

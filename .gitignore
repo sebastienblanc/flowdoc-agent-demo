@@ -42,3 +42,6 @@ Thumbs.db
 *.tmp
 *.bak
 *.log
+
+# Go module files in ai.documenter
+ai.documenter/go.sum

@@ -1,22 +1,64 @@
+models:
+  # Using a lightweight documentation-focused model
+  workflow-doc-model:
+    model: hf.co/qwen/qwen2.5-coder-3b-instruct-gguf:q4_k_m
+
 services:
   workflow-documenter:
-    image: python:3.11-slim
-    working_dir: /workspace
+    build:
+      context: ./ai.documenter
+      dockerfile: Dockerfile
     volumes:
       - .:/workspace
     environment:
-      - PYTHONUNBUFFERED=1
-    command: >
-      sh -c "
-      pip install --quiet pyyaml &&
-      python /workspace/scripts/document_workflows.py
-      "
+      SYSTEM_INSTRUCTIONS: |
+        You are an expert in GitHub Actions workflows and technical documentation.
+        Your task is to analyze GitHub Actions workflow YAML files and create comprehensive, well-structured markdown documentation.
+        
+        The documentation should include:
+        - A clear title with the workflow name
+        - Metadata (workflow file name, last generated timestamp)
+        - Trigger events (on: push, pull_request, workflow_dispatch, etc.) with all configuration details
+        - Environment variables defined at workflow level
+        - All jobs with their configurations
+        - For each job: name, runs-on, strategy (if matrix build), and dependencies
+        - All steps in each job with action names or commands
+        - Any inputs, outputs, or with parameters for steps
+        
+        Format the documentation using proper markdown with headers, lists, and code blocks.
+        Be concise but comprehensive. Use tables for complex data where appropriate.
+        
+      USER_MESSAGE: |
+        Please analyze this GitHub Actions workflow YAML file and generate comprehensive markdown documentation.
+        
+        Structure the documentation with:
+        1. A header with the workflow name (from the 'name' field)
+        2. Metadata section with the workflow file name
+        3. Last Generated timestamp in UTC
+        4. Triggers section explaining when the workflow runs
+        5. Environment variables section (if any)
+        6. Jobs section with detailed breakdown of each job
+        7. For each job, list all steps with their actions or commands
+        
+        Make sure to handle:
+        - Matrix builds in strategy
+        - Conditional steps (if: conditions)
+        - Job dependencies (needs:)
+        - Multiple trigger types
+        
+        Generate clear, professional documentation that would help developers understand this workflow.
+    
+    models:
+      workflow-doc-model:
+        endpoint_var: MODEL_RUNNER_BASE_URL
+        model_var: CHAT_MODEL_ID
+    
     profiles:
       - agent
 
 x-github-agent:
   name: workflow-documenter
-  description: Automatically generates markdown documentation for GitHub Action workflows
+  description: Automatically generates markdown documentation for GitHub Action workflows using AI
   triggers:
     - on: workflow_file_changed
       paths:
@@ -24,4 +66,5 @@ x-github-agent:
         - '.github/workflows/*.yaml'
   actions:
     - service: workflow-documenter
-      description: Generate documentation for modified workflow files
+      description: Generate AI-powered documentation for modified workflow files
+
