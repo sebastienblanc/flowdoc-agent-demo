@@ -26,7 +26,7 @@ func main() {
 
 	// Initialize OpenAI plugin with custom endpoint
 	oaiPlugin := &openai.OpenAI{
-		APIKey: "DockerAIDocumenter",
+		APIKey: "DockerAIDocumenter", // Placeholder key for Docker model runner
 		Opts: []option.RequestOption{
 			option.WithBaseURL(engineURL),
 		},
@@ -74,10 +74,7 @@ func main() {
 		response, err := genkit.Generate(ctx, g,
 			ai.WithModelName(chatModelId),
 			ai.WithSystem(os.Getenv("SYSTEM_INSTRUCTIONS")),
-			ai.WithMessages(
-				ai.NewSystemTextMessage(string(workflowContent)),
-			),
-			ai.WithPrompt(os.Getenv("USER_MESSAGE")),
+			ai.WithPrompt(os.Getenv("USER_MESSAGE")+"\n\nWorkflow YAML:\n"+string(workflowContent)),
 			
 			ai.WithStreaming(func(ctx context.Context, chunk *ai.ModelResponseChunk) error {
 				fmt.Print(chunk.Text())
@@ -85,7 +82,7 @@ func main() {
 			}),
 		)
 		if err != nil {
-			log.Printf("😡 Error during generation for %s: %v", file, err)
+			log.Printf("Error during generation for %s: %v", file, err)
 			continue
 		}
 
@@ -94,7 +91,7 @@ func main() {
 		outputFile := filepath.Join(docsDir, baseName+".md")
 		err = os.WriteFile(outputFile, []byte(response.Text()), 0644)
 		if err != nil {
-			log.Printf("😡 Error writing output file %s: %v", outputFile, err)
+			log.Printf("Error writing output file %s: %v", outputFile, err)
 			continue
 		}
 
@@ -125,7 +122,7 @@ This directory contains auto-generated documentation for all GitHub Actions work
 	indexPath := filepath.Join(docsDir, "README.md")
 	err = os.WriteFile(indexPath, []byte(indexContent), 0644)
 	if err != nil {
-		log.Printf("😡 Error writing index file: %v", err)
+		log.Printf("Error writing index file: %v", err)
 	}
 
 	fmt.Println("\n✅ Documentation generated successfully in docs/workflows/")
