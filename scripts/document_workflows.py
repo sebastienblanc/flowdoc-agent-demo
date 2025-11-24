@@ -40,22 +40,32 @@ def generate_workflow_documentation(workflow_path, workflow_data):
     
     # Triggers
     doc.append("## Triggers\n")
-    if 'on' in workflow_data:
-        triggers = workflow_data['on']
+    # YAML parses 'on' as True boolean, so check for both
+    triggers_key = 'on' if 'on' in workflow_data else True
+    if triggers_key in workflow_data:
+        triggers = workflow_data[triggers_key]
         if isinstance(triggers, str):
-            doc.append(f"- `{triggers}`\n")
+            doc.append(f"- **{triggers}**\n")
         elif isinstance(triggers, list):
             for trigger in triggers:
-                doc.append(f"- `{trigger}`\n")
+                doc.append(f"- **{trigger}**\n")
         elif isinstance(triggers, dict):
             for trigger_name, trigger_config in triggers.items():
                 doc.append(f"\n### {trigger_name}\n")
-                if trigger_config:
-                    if isinstance(trigger_config, dict):
-                        for key, value in trigger_config.items():
+                if trigger_config is None:
+                    doc.append("- Event triggered without additional configuration\n")
+                elif isinstance(trigger_config, dict):
+                    for key, value in trigger_config.items():
+                        if isinstance(value, list):
+                            doc.append(f"- **{key}:**\n")
+                            for item in value:
+                                doc.append(f"  - `{item}`\n")
+                        else:
                             doc.append(f"- **{key}:** `{value}`\n")
                 else:
                     doc.append(f"- Triggered on `{trigger_name}` event\n")
+    else:
+        doc.append("- No triggers defined\n")
     
     # Environment Variables
     if 'env' in workflow_data:
@@ -104,10 +114,28 @@ def generate_workflow_documentation(workflow_path, workflow_data):
                         
                         if 'run' in step:
                             run_cmd = step['run']
-                            # Truncate long commands
-                            if len(run_cmd) > 100:
-                                run_cmd = run_cmd[:100] + "..."
-                            doc.append(f"   - Run: `{run_cmd}`\n")
+                            # Handle multiline commands
+                            if '\n' in run_cmd:
+                                lines = run_cmd.strip().split('\n')
+                                if len(lines) <= 3:
+                                    # Show all lines for short commands
+                                    doc.append(f"   - Run:\n")
+                                    for line in lines:
+                                        if line.strip():
+                                            doc.append(f"     ```\n     {line.strip()}\n     ```\n")
+                                else:
+                                    # Show first few lines for long commands
+                                    doc.append(f"   - Run: Multi-line command ({len(lines)} lines)\n")
+                                    doc.append(f"     ```\n")
+                                    for line in lines[:3]:
+                                        if line.strip():
+                                            doc.append(f"     {line.strip()}\n")
+                                    doc.append(f"     ...\n     ```\n")
+                            else:
+                                # Single line command
+                                if len(run_cmd) > 100:
+                                    run_cmd = run_cmd[:100] + "..."
+                                doc.append(f"   - Run: `{run_cmd}`\n")
                         
                         if 'with' in step:
                             doc.append(f"   - With:\n")

@@ -1,8 +1,20 @@
 # Example CI Workflow
 **Workflow File:** `example-ci.yml`
-**Last Generated:** 2025-11-24 21:33:06 UTC
+**Last Generated:** 2025-11-24 21:36:21 UTC
 ---
 ## Triggers
+
+### push
+- **branches:**
+  - `main`
+  - `develop`
+
+### pull_request
+- **branches:**
+  - `main`
+
+### workflow_dispatch
+- Event triggered without additional configuration
 
 ## Environment Variables
 - **NODE_VERSION:** `18`
@@ -69,9 +81,13 @@
      - python-version: `${{ env.PYTHON_VERSION }}`
 
 3. **Install Python dependencies**
-   - Run: `python -m pip install --upgrade pip
-pip install pytest pytest-cov
-`
+   - Run:
+     ```
+     python -m pip install --upgrade pip
+     ```
+     ```
+     pip install pytest pytest-cov
+     ```
 
 4. **Run Python tests**
    - Run: `pytest --cov=. --cov-report=xml`
