@@ -1,73 +1,55 @@
 # Document Workflows
-**Workflow File:** `document-workflows.yml`
-**Last Generated:** 2025-11-24 21:39:47 UTC
----
+
+## Metadata
+
+- **Workflow File Name:** document-workflows.yml  
+- **Last Generated Timestamp:** YYYY-MM-DD HH:mm:ss UTC
+
 ## Triggers
 
-### push
-- **branches:**
-  - `main`
-  - `master`
-- **paths:**
-  - `.github/workflows/*.yml`
-  - `.github/workflows/*.yaml`
+This GitHub Actions workflow is triggered by:
+- a `push` event on the branches `main` and `master`, specifically for paths containing `.github/workflows/*.yml` or `.github/workflows/*.yaml`.
+- a `pull_request` event on paths containing `.github/workflows/*.yml` or `.github/workflows/*.yaml`.
+- a manual workflow dispatch.
 
-### pull_request
-- **paths:**
-  - `.github/workflows/*.yml`
-  - `.github/workflows/*.yaml`
+## Environment Variables
 
-### workflow_dispatch
-- Event triggered without additional configuration
+The workflow does not use any environment variables defined at the workflow level.
 
 ## Jobs
 
-### document
-**Name:** Generate Workflow Documentation
+This workflow contains three jobs:
 
-**Runs on:** `ubuntu-latest`
+### Job: Document Workflow
 
-**Steps:**
+#### Steps
 
 1. **Checkout repository**
-   - Uses: `actions/checkout@v4`
-   - With:
-     - fetch-depth: `0`
+    - Uses action `actions/checkout@v4`  
+    - Checks out the repository with a shallow clone using `fetch-depth: 0` to reduce cloning time.
 
 2. **Set up Docker Compose**
-   - Run:
-     ```
-     docker compose version
-     ```
 
+    - Runs a command to check the version of Docker Compose.
+    
 3. **Run documentation agent**
-   - Run:
-     ```
-     docker compose -f compose.agent.yml --profile agent run --rm workflow-documenter
-     ```
+    - Uses a custom script to run a Docker service named `agent`. The script specifies a profile (`agent`) and runs `workflow-documenter` as a one-off container.
 
 4. **Check for documentation changes**
-   - Run: Multi-line command (8 lines)
-     ```
-     git add docs/workflows/
-     if git diff --staged --quiet; then
-     echo "has_changes=false" >> $GITHUB_OUTPUT
-     ...
-     ```
+    - Initializes an output variable `has_changes`.
+    - Executes a Git diff to check if any files have changed in the repository's `docs/workflows/` directory.
+    - Sets the `has_changes` variable to either `true` or `false` and prints a message indicating whether documentation changes are detected.
 
-5. **Commit documentation**
-   - Run: Multi-line command (5 lines)
-     ```
-     git config --global user.name 'github-actions[bot]'
-     git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-     git add docs/workflows/
-     ...
-     ```
+5. **Commit documentation (if needed)**
+    - Conditional step based on the output of the `check_changes` step.
+    - Configures global Git user information and adds all files in `docs/workflows/`.
+    - Creates a new commit to push changes upstream.
+    
+6. **Upload documentation as artifact (if needed)**
+    - Another conditional step based on the output of the `check_changes` step.
+    - Uses the GitHub Actions `upload-artifact@v4` action to upload `docs/workflows/` as an artifact named `workflow-docs`.
+    - Specifies a retention period of 30 days for the artifact.
 
-6. **Upload documentation as artifact**
-   - Uses: `actions/upload-artifact@v4`
-   - With:
-     - name: `workflow-docs`
-     - path: `docs/workflows/`
-     - retention-days: `30`
+### Other Jobs
 
+This workflow does not contain any additional jobs under the main job description, but you can include more complex logic by adding more actions and steps as needed.

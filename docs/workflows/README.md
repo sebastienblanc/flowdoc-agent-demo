@@ -2,9 +2,9 @@
 
 This directory contains auto-generated documentation for all GitHub Actions workflows.
 
-**Last Updated:** 2025-11-24 21:39:47 UTC
+**Last Updated:** 2025-11-25 17:29:27 UTC
 
 ## Workflows
 
-- [Document Workflows](./document-workflows.md)
-- [Example CI Workflow](./example-ci.md)
+- [Document workflows](./document-workflows.md)
+- [Example ci](./example-ci.md)
