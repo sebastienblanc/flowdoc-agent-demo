@@ -1,7 +1,8 @@
 FROM golang:1.24 AS builder
 WORKDIR /app
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -o documenter main.go
+RUN go mod tidy
+RUN go build -o documenter main.go
 
 FROM alpine:latest
 WORKDIR /app
