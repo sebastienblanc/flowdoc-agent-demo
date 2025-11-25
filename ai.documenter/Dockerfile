@@ -1,6 +1,9 @@
-FROM golang:1.23-alpine
+FROM golang:1.24 AS builder
 WORKDIR /app
 COPY . .
-RUN go mod download
-RUN go build -o documenter main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -o documenter main.go
+
+FROM alpine:latest
+WORKDIR /app
+COPY --from=builder /app/documenter .
 ENTRYPOINT ["./documenter"]

@@ -18,7 +18,8 @@ services:
         condition: service_healthy
     environment:
       - OLLAMA_HOST=ollama:11434
-    command: /bin/sh -c "ollama pull qwen2.5-coder:3b-instruct-q4_K_M && echo 'Model loaded successfully'"
+    entrypoint: ["/bin/sh"]
+    command: ["-c", "ollama pull qwen2.5-coder:3b-instruct-q4_K_M && echo 'Model loaded successfully'"]
     profiles:
       - agent
 
