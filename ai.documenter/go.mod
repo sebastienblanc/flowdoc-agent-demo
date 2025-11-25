@@ -1,6 +1,8 @@
 module analyzer
 
-go 1.25.2
+go 1.24.1
+
+toolchain go1.24.10
 
 require (
 	github.com/firebase/genkit/go v1.1.0

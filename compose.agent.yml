@@ -1,16 +1,40 @@
-models:
-  # Using a lightweight documentation-focused model
-  workflow-doc-model:
-    model: hf.co/qwen/qwen2.5-coder-3b-instruct-gguf:q4_k_m
-
 services:
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama_data:/root/.ollama
+    profiles:
+      - agent
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  model-loader:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=ollama:11434
+    entrypoint: ["/bin/sh"]
+    command: ["-c", "ollama pull qwen2.5-coder:3b-instruct-q4_K_M && echo 'Model loaded successfully'"]
+    profiles:
+      - agent
+
   workflow-documenter:
     build:
       context: ./ai.documenter
       dockerfile: Dockerfile
+    depends_on:
+      model-loader:
+        condition: service_completed_successfully
     volumes:
       - .:/workspace
     environment:
+      MODEL_RUNNER_BASE_URL: http://ollama:11434/v1
+      CHAT_MODEL_ID: qwen2.5-coder:3b-instruct-q4_K_M
       SYSTEM_INSTRUCTIONS: |
         You are an expert in GitHub Actions workflows and technical documentation.
         Your task is to analyze GitHub Actions workflow YAML files and create comprehensive, well-structured markdown documentation.
@@ -48,13 +72,11 @@ services:
         
         Generate clear, professional documentation that would help developers understand this workflow.
     
-    models:
-      workflow-doc-model:
-        endpoint_var: MODEL_RUNNER_BASE_URL
-        model_var: CHAT_MODEL_ID
-    
     profiles:
       - agent
+
+volumes:
+  ollama_data:
 
 x-github-agent:
   name: workflow-documenter
