@@ -12,8 +12,9 @@ The system consists of three main components:
 
 ### 1. Docker Compose Agent (`compose.agent.yml`)
 
-A Docker Compose configuration that leverages Docker's AI features:
-- Defines an AI model (`workflow-doc-model`) using Qwen 2.5 Coder for documentation generation
+A Docker Compose configuration that uses Ollama for local AI model execution:
+- Sets up Ollama service to run AI models locally
+- Downloads and configures Qwen 2.5 Coder model for documentation generation
 - Configures a `workflow-documenter` service with AI-powered analysis
 - Uses environment variables to provide system instructions and prompts to the AI
 - Can be triggered based on workflow file changes
@@ -86,16 +87,16 @@ See the automatically generated documentation:
 
 ## Requirements
 
-- Docker and Docker Compose with AI features support
+- Docker and Docker Compose
 - GitHub Actions enabled on the repository
 - Write permissions for GitHub Actions (to commit documentation)
 
 ## Technical Details
 
 This implementation uses:
-- **Docker Compose Models**: Native AI model integration in Docker Compose
+- **Ollama**: Local AI model runner for executing language models
 - **Firebase Genkit**: Go framework for building AI-powered applications
-- **OpenAI-compatible API**: Docker's model runner provides OpenAI-compatible endpoints
+- **OpenAI-compatible API**: Ollama provides OpenAI-compatible endpoints
 - **Qwen 2.5 Coder**: Specialized coding model optimized for understanding code and technical documentation
 
 ## License
