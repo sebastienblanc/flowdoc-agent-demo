@@ -1,4 +1,4 @@
-module analyzer
+module documenter
 
 go 1.24.1
 
