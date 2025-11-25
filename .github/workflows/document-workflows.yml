@@ -1,0 +1,66 @@
+name: Document Workflows
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - '.github/workflows/*.yml'
+      - '.github/workflows/*.yaml'
+  pull_request:
+    paths:
+      - '.github/workflows/*.yml'
+      - '.github/workflows/*.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  document:
+    name: Generate Workflow Documentation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Docker Compose
+        run: |
+          docker compose version
+          
+      - name: Run documentation agent
+        run: |
+          docker compose -f compose.agent.yml --profile agent run --rm workflow-documenter
+      
+      - name: Check for documentation changes
+        id: check_changes
+        run: |
+          git add docs/workflows/
+          if git diff --staged --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No documentation changes detected"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Documentation changes detected"
+          fi
+      
+      - name: Commit documentation
+        if: steps.check_changes.outputs.has_changes == 'true' && github.event_name != 'pull_request'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add docs/workflows/
+          git commit -m "docs: Auto-generate workflow documentation [skip ci]"
+          git push
+      
+      - name: Upload documentation as artifact
+        if: steps.check_changes.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: workflow-docs
+          path: docs/workflows/
+          retention-days: 30
