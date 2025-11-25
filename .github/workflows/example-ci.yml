@@ -103,7 +103,7 @@ jobs:
           echo "✓ Test 2: Validating compose file"
           docker compose -f compose.agent.yml config > /dev/null 2>&1 || exit 1
           
-          echo "All tests passed!"
+          echo "All tests passed! You are the king"
       
       - name: Generate test report
         run: |
